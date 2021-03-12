@@ -20,21 +20,21 @@ import java.util.List;
 @RequiredArgsConstructor
 @Component
 public class JwtTokenProvider {
-    private String secretKey = "nyarosys";
-    private long tokenValidTime = 30 * 60 * 1000L;
+    private String secretKey = "nyarosys"; // 비밀 키 정의
+    private long tokenValidTime = 30 * 60 * 1000L; // 토큰 만료 시간 설정 (30분)
     private final UserDetailsService userDetailsService;
 
     @PostConstruct
     protected void init() {
-        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes()); // base64로 비밀 키 인코딩
     }
 
     public String createToken(String userPk, List<String> roles) {
-        Claims claims = Jwts.claims().setSubject(userPk);
+        Claims claims = Jwts.claims().setSubject(userPk); // claim 정의
         claims.put("roles", roles);
         Date now = new Date();
 
-        return Jwts.builder()
+        return Jwts.builder() // token 생성
                 .setClaims(claims)
                 .setIssuedAt(now)
                 .setExpiration(new Date(now.getTime() + tokenValidTime))
@@ -58,11 +58,11 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String jwtToken) {
         try {
-            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken);
+            Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(jwtToken); // token 검증
 
-            return !claims.getBody().getExpiration().before(new Date());
+            return !claims.getBody().getExpiration().before(new Date()); // 유효 기간 내 true 반환
         } catch(Exception e) {
-            return false;
+            return false; // 유효 기간 만료 시 false 반환
         }
     }
 }
